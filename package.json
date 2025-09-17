@@ -2,7 +2,10 @@
   "name": "decoded-intern-project",
   "version": "1.0.0",
   "scripts": {
-    "build": "cd client && npm install && npm run build",
-    "start": "npm run build && cd server && node server.js"
+    "install-client": "cd client && npm install",
+    "install-server": "cd server && npm install",
+    "build-client": "cd client && npm run build",
+    "build": "npm run install-client && npm run install-server && npm run build-client",
+    "start": "npm run build && node server/server.js"
   }
 }
