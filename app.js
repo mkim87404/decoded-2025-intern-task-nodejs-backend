@@ -6,7 +6,7 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 // Allow Only the Frontend Domain for CORS
-app.use(cors({ origin: 'https://decoded-2025-intern-task-reactjs-frontend.onrender.com/' }));
+app.use(cors({ origin: 'https://decoded-2025-intern-task-reactjs-frontend.onrender.com' }));
 // Optionally, Allow all origins (good for dev, not for prod)
 // app.use(cors());
 
