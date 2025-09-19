@@ -13,5 +13,8 @@
     "axios": "^1.12.2",
     "cors": "^2.8.5",
     "express": "^5.1.0"
+  },
+  "devDependencies": {
+    "dotenv": "^17.2.2"
   }
 }
