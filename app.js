@@ -36,7 +36,11 @@ App Description: """${userInput}"""`;
     headers: { Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`, 'Content-Type': 'application/json' }
   });
 
-  res.json(response.data);
+  // Return only the AI's Response
+  // AI Response JSON Structure for the Nvidia Chat Completions API Responses
+  // TODO: Try Catch the AI Response Parsing
+  // TODO: JSON Schema Validate the response and on error, signal to Frontend where it will display "try again" message.
+  res.json(response.data.choices[0].message.content);
 });
 
 // Simpler Port Listen
