@@ -29,7 +29,7 @@ app.post('/extract', async (req, res) => {
 App Description: """${userInput}"""`;
   // res.json(prompt);  // TESTING PURPOSE
   const response = await axios.post('https://openrouter.ai/api/v1/chat/completions', {
-    model: 'nvidia/nemotron-nano-9b-v2:free',
+    model: process.env.AI_MODEL,
     messages: [{ role: 'user', content: prompt }],
   }, {
     headers: { Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`, 'Content-Type': 'application/json' }
