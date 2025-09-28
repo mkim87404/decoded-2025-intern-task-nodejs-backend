@@ -67,6 +67,12 @@ const validate = (new Ajv()).compile(
 app.post('/extract', async (req, res, next) => {
   try {
     const userInput = req.body.description;
+    // Validate the User Input before invoking the AI API
+    if (!userInput || typeof userInput !== 'string') {
+      const error = new Error('Missing or invalid app description');
+      error.status = 400;
+      throw error;
+    }
     const prompt = `Given a description of an app, first extract a list called "Roles" containing all agents that perform an action on this app, and for each "Role", devise a sublist called "Features" containing all functionalities of the app performed by the "Role". Each "Feature" will be implemented as a dedicated form on the app, so for each "Feature", devise 2 sublists called "Input Fields" and "Buttons" containing all relevant input fields and buttons that could go on the feature's form, respectively. Then, for each "Feature", include a property called "Entity" by deducing the most appropriate entity that is being acted upon on the feature's form, where this "Entity" will subsequently change state, and the app will typically keep track of this "Entity" through database tables. Finally, return a single JSON Object containing a property named "App Name", giving it an appropriate value considering the overall theme of the app, and a property named "Roles" which is the completed "Roles" list in its nested form. Your response must be a single valid JSON object matching the following JSON schema structure precisely { "App Name": string, "Roles": [ { "Role": string, "Features": [ { "Feature": string, "Entity": string, "Input Fields": [string], "Buttons": [string] } ] } ] } All key names must match exactly in spelling and capitalization and spacing. Do not include any explanation, markdown or formatting in your response. Do not wrap the entire response in quotes.
     App Description: """${userInput}"""`;
     // res.json(prompt);  // TESTING PURPOSE
