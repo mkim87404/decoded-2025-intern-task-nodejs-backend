@@ -8,6 +8,9 @@ const Ajv = require('ajv');
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+// Prevent the Backend axios requests from hanging indefinitely
+const AXIOS_REQUEST_TIMEOUT = Number(process.env.AXIOS_REQUEST_TIMEOUT) || 35000; // Use fallback timeout if no environment variable set
+
 // Default AI API request retry threshold count to 3 if not found from environment variable
 const AI_API_RETRY_THRESHOLD = Number(process.env.AI_API_RETRY_THRESHOLD || 2);
 // Parse an array of available AI models from the environment variable (comma separated AI model names)
@@ -93,9 +96,10 @@ app.post('/extract', async (req, res, next) => {
       try {
         response = await axios.post('https://openrouter.ai/api/v1/chat/completions', {
           model: aiModel.name, // process.env.AI_MODEL, // use this if need to fix the AI Model
-          messages: [{ role: 'user', content: prompt }],
+          messages: [{ role: 'user', content: prompt }]
         }, {
-          headers: { Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`, 'Content-Type': 'application/json' }
+          headers: { Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`, 'Content-Type': 'application/json' },
+          timeout: AXIOS_REQUEST_TIMEOUT
         });
 
         // Successfully fetched an AI response
