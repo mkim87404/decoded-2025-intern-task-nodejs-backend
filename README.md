@@ -3,7 +3,7 @@
 1. Please visit the live frontend site at https://decoded-2025-intern-task-reactjs-frontend.onrender.com/
 2. Inside the Text Input box, enter any description of a desired app.
 3. Complete the Google reCAPTCHA Challenge to enable the Submit button.
-4. Click "Submit" and wait for the Mock App to generate and the loading wheel to disappear. You may be prompted to retry in the case of an AI API rate limiting or AI processing timeout, etc., with a descriptive error messsage. (My app is currently using a pool of rotating free AI models to bypass most rate-limiting, but the free models have inherently slow and fluctuant response times).
+4. Click "Submit" and wait for the Mock App to generate and the loading wheel to disappear. (You may be prompted to retry in the case of an AI API rate limiting or AI processing timeout error, etc.)
 5. Under the "AI Captured Requirements" section, note the extracted App Requirements including (App Name, Entities, Roles, Features).
 6. (Optional) Click "View Requirements in JSON" Button to view the hierarchical structure among the extracted Roles, Features and Entities.
 7. Under the "Generated UI" section, explore the generated Mock UI, containing a top menu for the "Roles" selection, side panel for the "Forms" selection, and the dynamically generated forms containing relevant input fields and buttons.
