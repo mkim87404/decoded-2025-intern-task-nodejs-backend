@@ -9,7 +9,7 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 // Default AI API request retry threshold count to 3 if not found from environment variable
-const AI_API_RETRY_THRESHOLD = Number(process.env.AI_API_RETRY_THRESHOLD || 3);
+const AI_API_RETRY_THRESHOLD = Number(process.env.AI_API_RETRY_THRESHOLD || 2);
 // Parse an array of available AI models from the environment variable (comma separated AI model names)
 const AI_MODEL_POOL = process.env.AI_MODEL_POOL ? process.env.AI_MODEL_POOL.split(',').map(name => ({ name: name.trim(), failCount: 0 })) : [];
 
