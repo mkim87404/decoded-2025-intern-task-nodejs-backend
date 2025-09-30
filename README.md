@@ -10,11 +10,11 @@
 
 ## Project Deployment Structure
 
-Frontend Site (App's Main Entry): https://decoded-2025-intern-task-reactjs-frontend.onrender.com/  
-Frontend GitHub Repository: https://github.com/mkim87404/decoded-2025-intern-task-reactjs-frontend  
-Backend GitHub Repository: https://github.com/mkim87404/decoded-2025-intern-task-nodejs-backend  
-Backend Webservice Domain: https://mkim-decoded-intern-2025.onrender.com/  
-Backend Webservice Resource Endpoint URL: https://mkim-decoded-intern-2025.onrender.com/extract
+- Frontend Site (App's Main Entry): https://decoded-2025-intern-task-reactjs-frontend.onrender.com/  
+- Frontend GitHub Repository: https://github.com/mkim87404/decoded-2025-intern-task-reactjs-frontend  
+- Backend GitHub Repository: https://github.com/mkim87404/decoded-2025-intern-task-nodejs-backend  
+- Backend Webservice Domain: https://mkim-decoded-intern-2025.onrender.com/  
+- Backend Webservice Resource Endpoint URL: https://mkim-decoded-intern-2025.onrender.com/extract
 
 This project is deployed on the "Render" hosting platform in 2 separate GitHub repositories; 1 for the frontend, and 1 for the backend.  
 - The frontend is deployed as a Static Site written in React.js, bootstrapped with [Create React App](https://github.com/facebook/create-react-app).  
