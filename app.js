@@ -11,9 +11,9 @@ const PORT = process.env.PORT || 3001;
 // Prevent the Backend axios requests from hanging indefinitely
 const AXIOS_REQUEST_TIMEOUT = Number(process.env.AXIOS_REQUEST_TIMEOUT) || 35000; // Use fallback timeout if no environment variable set
 
-// Default AI API request retry threshold count to 3 if not found from environment variable
+// Use fallback AI API request retry threshold count if not found from environment variable
 const AI_API_RETRY_THRESHOLD = Number(process.env.AI_API_RETRY_THRESHOLD || 2);
-// Parse an array of available AI models from the environment variable (comma separated AI model names)
+// Parse an array of compatible AI models from the environment variable (comma separated AI model names)
 const AI_MODEL_POOL = process.env.AI_MODEL_POOL ? process.env.AI_MODEL_POOL.split(',').map(name => ({ name: name.trim(), failCount: 0 })) : [];
 
 // Middleware to only allow the frontend domain for CORS
@@ -133,7 +133,7 @@ app.post('/extract', async (req, res, next) => {
 
 // Middleware for global error handling (should be placed last) - triggered only when an error is passed to next(err)
 app.use((err, req, res, next) => {
-  console.error(err.stack); // Log the error for server side debugging
+  console.error(err.stack); // Log the error for server-side debugging
 
   // No need for specific error handling at this point
   res.status(500).json({ message: 'Something went wrong.' });
