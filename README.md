@@ -17,7 +17,7 @@
 - Backend Webservice Resource Endpoint URL: https://mkim-decoded-intern-2025.onrender.com/extract
 
 This project is deployed on the "Render" hosting platform in 2 separate GitHub repositories; 1 for the frontend, and 1 for the backend.  
-- The frontend is deployed as a Static Site written in React.js, bootstrapped with [Create React App](https://github.com/facebook/create-react-app).  
+- The frontend is deployed as a Static Site written in React.js, bootstrapped with [Create React App](https://github.com/facebook/create-react-app), and styled with Tailwind CSS v3 (LTS Version compatible with Create React App Projects).
 - The backend is deployed as a Web Service written in Node.js, utilizing the Express framework to expose a REST API (POST) which the frontend interacts with to display dynamic content.
 
 ## Project Design & Features
