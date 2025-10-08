@@ -16,8 +16,22 @@ const AI_API_RETRY_THRESHOLD = Number(process.env.AI_API_RETRY_THRESHOLD || 2);
 // Parse an array of compatible AI models from the environment variable (comma separated AI model names)
 const AI_MODEL_POOL = process.env.AI_MODEL_POOL ? process.env.AI_MODEL_POOL.split(',').map(name => ({ name: name.trim(), failCount: 0 })) : [];
 
-// Middleware to only allow the frontend domain for CORS
-app.use(cors({ origin: 'https://decoded-2025-intern-task-reactjs-frontend.onrender.com' }));
+// Middleware for CORS whitelisting
+const CORS_ALLOWED_REQUEST_ORIGINS = process.env.CORS_ALLOWED_REQUEST_ORIGINS ? process.env.CORS_ALLOWED_REQUEST_ORIGINS.split(',').map(origin => origin.trim()) : [];
+const DEV_GITHUB_CODESPACES_SUBDOMAIN = process.env.DEV_GITHUB_CODESPACES_SUBDOMAIN; // For testing
+
+app.use(cors({
+  origin: function (origin, callback) {
+    if (
+      CORS_ALLOWED_REQUEST_ORIGINS.includes(origin) ||
+      (DEV_GITHUB_CODESPACES_SUBDOMAIN && origin && origin.startsWith(`https://${DEV_GITHUB_CODESPACES_SUBDOMAIN}`) && origin.endsWith('.app.github.dev'))
+    ) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  }
+}));
 
 // Middleware to parse inbound requests in JSON
 app.use(express.json());  // express.json() middleware internally uses next(err) when it encounters a parsing error.
