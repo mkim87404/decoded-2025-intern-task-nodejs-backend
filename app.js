@@ -99,9 +99,13 @@ app.post('/extract', async (req, res, next) => {
       && origin.startsWith(`https://${DEV_GITHUB_CODESPACES_SUBDOMAIN}`)
       && origin.endsWith('.app.github.dev')
     ) {
-      return res.json(
-        {
-          "App Name": "SocialApp",
+      const dummyResponses = {
+        small: { 
+          "App Name" : "SmallApp",
+          "Roles" : []
+        },
+        big: {
+          "App Name": "BigApp",
           "Roles": [
             {
               "Role": "User",
@@ -145,7 +149,9 @@ app.post('/extract', async (req, res, next) => {
             }
           ]
         }
-      );
+      };
+      
+      return res.json(req.body?.description?.trim() === 'small' ? dummyResponses.small : dummyResponses.big);
     }
 
     // Validate the user input before invoking the AI API
