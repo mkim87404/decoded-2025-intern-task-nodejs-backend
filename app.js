@@ -91,8 +91,65 @@ function getAvailableModel() {
 // API route - Extract & Return app requirements using an AI API
 app.post('/extract', async (req, res, next) => {
   try {
-    const userInput = req.body.description;
+    // Return a dummy JSON response when testing from Github Codespace's local preview domain
+    const origin = req.get('Origin') || req.get('Referer');
+    if (
+      DEV_GITHUB_CODESPACES_SUBDOMAIN
+      && origin
+      && origin.startsWith(`https://${DEV_GITHUB_CODESPACES_SUBDOMAIN}`)
+      && origin.endsWith('.app.github.dev')
+    ) {
+      return res.json(
+        {
+          "App Name": "SocialApp",
+          "Roles": [
+            {
+              "Role": "User",
+              "Features": [
+                {
+                  "Feature": "Create Post",
+                  "Entity": "Post",
+                  "Input Fields": ["Title", "Content", "Tags", "Image Upload", "Privacy Settings", "Location", "Scheduled Time"],
+                  "Buttons": ["Submit", "Save Draft", "Cancel", "Add Image", "Tag Friends", "Set Location"]
+                },
+                {
+                  "Feature": "Comment on Post",
+                  "Entity": "Comment",
+                  "Input Fields": ["Comment Text", "Emoji Reactions"],
+                  "Buttons": ["Post Comment", "Edit Comment", "Delete Comment", "Like Comment"]
+                }
+              ]
+            },
+            {
+              "Role": "Admin",
+              "Features": [
+                {
+                  "Feature": "Invite Users",
+                  "Entity": "User",
+                  "Input Fields": ["Username", "Email", "Role", "Invite Date", "Invitation Message", "Expiration Date", "Status", "Resend Count"],
+                  "Buttons": ["Send Invite", "Resend Invite", "Cancel Invite", "View Invite Status", "Filter Invites", "Sort Invites"]
+                },
+                {
+                  "Feature": "Manage Users",
+                  "Entity": "User",
+                  "Input Fields": ["Username"],
+                  "Buttons": ["Add", "Delete"]
+                },
+                {
+                  "Feature": "Reward Users",
+                  "Entity": "User",
+                  "Input Fields": ["Username", "Email", "Reward Type", "Reward Amount", "Reward Date", "Reward Reason"],
+                  "Buttons": ["Give Reward", "Delete Reward", "View Rewards", "Edit Reward", "Filter Rewards", "Sort Rewards"]
+                }
+              ]
+            }
+          ]
+        }
+      );
+    }
+
     // Validate the user input before invoking the AI API
+    const userInput = req.body.description;
     if (!userInput || typeof userInput !== 'string' || userInput.trim() === '') {
       const error = new Error('Missing or invalid app description');
       error.status = 400;
