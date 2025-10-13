@@ -8,26 +8,38 @@ const Ajv = require('ajv');
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// Prevent the Backend axios requests from hanging indefinitely
+// Prevent the Backend axios requests from hanging indefinitely or unnecessarily long
 const AXIOS_REQUEST_TIMEOUT = Number(process.env.AXIOS_REQUEST_TIMEOUT) || 35000; // Use fallback timeout if no environment variable set
+
+// Google reCAPTCHA token verification API configurations
+const GOOGLE_RECAPTCHA_VERIFICATION_API_URL = process.env.GOOGLE_RECAPTCHA_VERIFICATION_API_URL;
+const GOOGLE_RECAPTCHA_SECRET_KEY = process.env.GOOGLE_RECAPTCHA_SECRET_KEY;
 
 // OpenRouter.ai API configurations
 const OPENROUTER_API_URL = process.env.OPENROUTER_API_URL;
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
-// Use fallback AI API request retry threshold count if not found from environment variable
+// AI API request retry threshold count (use fallback if not found from environment variable)
 const AI_API_RETRY_THRESHOLD = Number(process.env.AI_API_RETRY_THRESHOLD || 2);
 // Parse an array of compatible AI models from the environment variable (comma separated AI model names)
 const AI_MODEL_POOL = process.env.AI_MODEL_POOL ? process.env.AI_MODEL_POOL.split(',').map(name => ({ name: name.trim(), failCount: 0 })) : [];
 
-// Middleware for CORS whitelisting
+// CORS whitelisting
 const CORS_ALLOWED_REQUEST_ORIGINS = process.env.CORS_ALLOWED_REQUEST_ORIGINS ? process.env.CORS_ALLOWED_REQUEST_ORIGINS.split(',').map(origin => origin.trim()) : [];
-const DEV_GITHUB_CODESPACES_SUBDOMAIN = process.env.DEV_GITHUB_CODESPACES_SUBDOMAIN; // For testing
+const CORS_ALLOWED_REQUEST_HOSTNAMES = CORS_ALLOWED_REQUEST_ORIGINS.map(origin => {
+  try {
+    return new URL(origin).hostname;
+  } catch {
+    return null;
+  }
+}).filter(Boolean); // Filter out any null values from invalid URLs
+const DEV_GITHUB_CODESPACES_SUBDOMAIN_PREFIX = process.env.DEV_GITHUB_CODESPACES_SUBDOMAIN_PREFIX; // For testing
+const DEV_GITHUB_CODESPACES_SUBDOMAIN_POSTFIX = process.env.DEV_GITHUB_CODESPACES_SUBDOMAIN_POSTFIX; // For testing
 
 app.use(cors({
   origin: function (origin, callback) {
     if (
-      CORS_ALLOWED_REQUEST_ORIGINS.includes(origin) ||
-      (DEV_GITHUB_CODESPACES_SUBDOMAIN && origin && origin.startsWith(`https://${DEV_GITHUB_CODESPACES_SUBDOMAIN}`) && origin.endsWith('.app.github.dev'))
+      CORS_ALLOWED_REQUEST_ORIGINS.includes(origin)
+      || (DEV_GITHUB_CODESPACES_SUBDOMAIN_PREFIX && DEV_GITHUB_CODESPACES_SUBDOMAIN_POSTFIX && origin && origin.startsWith(`https://${DEV_GITHUB_CODESPACES_SUBDOMAIN_PREFIX}`) && origin.endsWith(DEV_GITHUB_CODESPACES_SUBDOMAIN_POSTFIX))
     ) {
       callback(null, true);
     } else {
@@ -97,10 +109,10 @@ app.post('/extract', async (req, res, next) => {
     // Return a dummy JSON response when testing from Github Codespace's local preview domain
     const origin = req.get('Origin') || req.get('Referer');
     if (
-      DEV_GITHUB_CODESPACES_SUBDOMAIN
+      DEV_GITHUB_CODESPACES_SUBDOMAIN_PREFIX && DEV_GITHUB_CODESPACES_SUBDOMAIN_POSTFIX
       && origin
-      && origin.startsWith(`https://${DEV_GITHUB_CODESPACES_SUBDOMAIN}`)
-      && origin.endsWith('.app.github.dev')
+      && origin.startsWith(`https://${DEV_GITHUB_CODESPACES_SUBDOMAIN_PREFIX}`)
+      && origin.endsWith('DEV_GITHUB_CODESPACES_SUBDOMAIN_POSTFIX')
     ) {
       const dummyResponses = {
         small: { 
@@ -157,16 +169,41 @@ app.post('/extract', async (req, res, next) => {
       return res.json(req.body?.description?.trim() === 'small' ? dummyResponses.small : dummyResponses.big);
     }
 
-    // Validate the user input before invoking the AI API
+    // Validate the user input description
     const userInput = req.body.description;
-    if (!userInput || typeof userInput !== 'string' || userInput.trim() === '') {
-      const error = new Error('Missing or invalid app description');
-      error.status = 400;
+    if (!userInput || typeof userInput !== 'string' || userInput.trim() === '') throw new Error('Missing or invalid app description');
+    // Validate the Google reCAPTCHA token
+    const recaptchaToken = req.body.recaptcha?.trim();
+    if (!recaptchaToken || typeof recaptchaToken !== 'string' || recaptchaToken === '') throw new Error('Missing or invalid reCAPTCHA token');
+
+    // Verify the Google reCAPTCHA token with Google reCAPTCHA verification API
+    if (!GOOGLE_RECAPTCHA_VERIFICATION_API_URL || !GOOGLE_RECAPTCHA_SECRET_KEY) throw new Error('Missing Google reCAPTCHA verification API configuration in environment variables');
+    
+    const recaptchaVerificationResult = await axios.post(GOOGLE_RECAPTCHA_VERIFICATION_API_URL,
+      new URLSearchParams({
+        secret: GOOGLE_RECAPTCHA_SECRET_KEY,
+        response: recaptchaToken,
+      }).toString(),
+      {
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        timeout: AXIOS_REQUEST_TIMEOUT
+      }
+    );
+    const recaptchaHostname = recaptchaVerificationResult.data.hostname;
+    
+    if (
+        !recaptchaVerificationResult.data.success
+        || !recaptchaHostname
+        || (!CORS_ALLOWED_REQUEST_HOSTNAMES.includes(recaptchaHostname) && (!recaptchaHostname.startsWith(DEV_GITHUB_CODESPACES_SUBDOMAIN_PREFIX) || !recaptchaHostname.endsWith(DEV_GITHUB_CODESPACES_SUBDOMAIN_POSTFIX)))
+      ) {
+      const error = new Error('Failed Google reCAPTCHA token verification');
+      error.status = 403;
+      error.details = recaptchaVerificationResult.data;
       throw error;
     }
 
     // Check the AI API configurations are set
-    if (!OPENROUTER_API_URL || !OPENROUTER_API_KEY) throw new Error('Incomplete AI API configurations in the environment variables.');
+    if (!OPENROUTER_API_URL || !OPENROUTER_API_KEY) throw new Error('Missing OpenRouter AI API configuration in environment variables.');
 
     const prompt = `Given a description of an app, first extract a list called "Roles" containing all agents that perform an action on this app, and for each "Role", devise a sublist called "Features" containing all functionalities of the app performed by the "Role". Each "Feature" will be implemented as a dedicated form on the app, so for each "Feature", devise 2 sublists called "Input Fields" and "Buttons" containing all relevant input fields and buttons that could go on the feature's form, respectively. Then, for each "Feature", include a property called "Entity" by deducing the most appropriate entity that is being acted upon on the feature's form, where this "Entity" will subsequently change state, and the app will typically keep track of this "Entity" through database tables. Finally, return a single JSON Object containing a property named "App Name", giving it an appropriate value considering the overall theme of the app, and a property named "Roles" which is the completed "Roles" list in its nested form. Your response must be a single valid JSON object matching the following JSON schema structure precisely { "App Name": string, "Roles": [ { "Role": string, "Features": [ { "Feature": string, "Entity": string, "Input Fields": [string], "Buttons": [string] } ] } ] } All key names must match exactly in spelling and capitalization and spacing. Do not include any explanation, markdown or formatting in your response. Do not wrap the entire response in quotes.
     App Description: """${userInput}"""`;
@@ -178,6 +215,7 @@ app.post('/extract', async (req, res, next) => {
       if (!aiModel) throw new Error('No AI model available in the AI models pool.');
 
       try {
+        // Invoke the AI API
         response = await axios.post(OPENROUTER_API_URL, {
           model: aiModel.name, // process.env.AI_MODEL, // use this if need to fix the AI Model
           messages: [{ role: 'user', content: prompt }]
