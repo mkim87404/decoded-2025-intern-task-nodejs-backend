@@ -112,7 +112,7 @@ app.post('/extract', async (req, res, next) => {
       DEV_GITHUB_CODESPACES_SUBDOMAIN_PREFIX && DEV_GITHUB_CODESPACES_SUBDOMAIN_POSTFIX
       && origin
       && origin.startsWith(`https://${DEV_GITHUB_CODESPACES_SUBDOMAIN_PREFIX}`)
-      && origin.endsWith('DEV_GITHUB_CODESPACES_SUBDOMAIN_POSTFIX')
+      && origin.endsWith(DEV_GITHUB_CODESPACES_SUBDOMAIN_POSTFIX)
     ) {
       const dummyResponses = {
         small: { 
