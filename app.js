@@ -182,7 +182,7 @@ app.post('/extract', async (req, res, next) => {
     const recaptchaVerificationResult = await axios.post(GOOGLE_RECAPTCHA_VERIFICATION_API_URL,
       new URLSearchParams({
         secret: GOOGLE_RECAPTCHA_SECRET_KEY,
-        response: recaptchaToken,
+        response: recaptchaToken, // Each reCAPTCHA user response token is valid for two minutes, and can only be verified once to prevent replay attacks.
       }).toString(),
       {
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
