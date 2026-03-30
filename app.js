@@ -9,7 +9,7 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 // Prevent the Backend axios requests from hanging indefinitely or unnecessarily long
-const AXIOS_REQUEST_TIMEOUT = Number(process.env.AXIOS_REQUEST_TIMEOUT) || 35000; // Use fallback timeout if no environment variable set
+const AXIOS_REQUEST_TIMEOUT = Number(process.env.AXIOS_REQUEST_TIMEOUT) || 100000; // Use fallback timeout if no environment variable set
 
 // Google reCAPTCHA token verification API configurations
 const GOOGLE_RECAPTCHA_VERIFICATION_API_URL = process.env.GOOGLE_RECAPTCHA_VERIFICATION_API_URL;

@@ -1,45 +1,105 @@
 # Mock App Builder
 
+[![React](https://img.shields.io/badge/React-20232A?logo=react&logoColor=61DAFB)](https://react.dev/)
+[![Node.js](https://img.shields.io/badge/Node.js-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
+[![Express.js](https://img.shields.io/badge/Express.js-404D59?logo=express&logoColor=white)](https://expressjs.com/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
+[![OpenRouter](https://img.shields.io/badge/OpenRouter-94A3B8?logo=openrouter&logoColor=white)](https://openrouter.ai/)
+[![Render](https://img.shields.io/badge/Deployed_on-Render-46E3B7?logo=render&logoColor=white)](https://render.com/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
+A full-stack AI-powered web application that turns a text description of any desired app into an interactive mock UI. You simply describe what you want (e.g. "a task management app for freelancers with client invoicing"), and the app uses AI to intelligently extract structured requirements — app name, entities, roles, and features — then dynamically generates a fully navigable prototype complete with role-based top menu, form sidebar, and context-aware input fields/buttons. The app is implemented with custom configurable AI-pooling and intelligent model-switching retry mechanism to gracefully handle errors and API rate limits.
+
 ## 🚀 How to get started
 
 1. Please visit the live frontend site at https://decoded-2025-intern-task-reactjs-frontend.onrender.com/
 2. Inside the Text Input box, enter any description of a desired app.
 3. Complete the Google reCAPTCHA Challenge to enable the Build button.
-4. Click "Build" and wait for the Mock App to generate and the loading wheel to disappear. (You may be prompted to retry in the case of an AI API rate limiting or AI processing timeout error, etc.)
-5. Under the "AI Captured Requirements" section, note the extracted App Requirements including (App Name, Entities, Roles, Features).
-6. (Optional) Click "View Requirements in JSON" Button to view the hierarchical structure among the extracted Roles, Features and Entities.
+4. Click "Build" and wait for the Mock App to generate and the loading wheel to disappear. (You may be prompted to retry in the case of an AI API rate limit or AI processing timeout error, etc.)
+5. Under the "AI Captured Requirements" section, view the extracted App Requirements including (App Name, Entities, Roles, Features).
+6. (Optional) Click "View Requirements in JSON" Button to see the hierarchical structure among the extracted Roles, Features and Entities.
 7. Under the "Generated UI" section, explore the generated Mock UI, containing a top menu for the "Roles" selection, side panel for the "Forms" selection, and the dynamically generated forms containing relevant input fields and buttons.
 
 ## 🏛️ Project Deployment Structure
 
-- Frontend Site (App's Main Entry): https://decoded-2025-intern-task-reactjs-frontend.onrender.com/  
-- Frontend GitHub Repository: https://github.com/mkim87404/decoded-2025-intern-task-reactjs-frontend  
-- Backend GitHub Repository: https://github.com/mkim87404/decoded-2025-intern-task-nodejs-backend  
-- Backend Webservice Domain: https://mkim-decoded-intern-2025.onrender.com/  
+- Live Web App Site: https://decoded-2025-intern-task-reactjs-frontend.onrender.com/
+- Frontend GitHub Repository: https://github.com/mkim87404/decoded-2025-intern-task-reactjs-frontend
+- Backend GitHub Repository: https://github.com/mkim87404/decoded-2025-intern-task-nodejs-backend
+- Backend Webservice Domain: https://mkim-decoded-intern-2025.onrender.com/
 - Backend Webservice Resource Endpoint URL: https://mkim-decoded-intern-2025.onrender.com/extract
 
 This project is deployed on the "Render" hosting platform in 2 separate GitHub repositories; 1 for the frontend, and 1 for the backend.  
 - The frontend is deployed as a Static Site written in React.js, bootstrapped with [Create React App](https://github.com/facebook/create-react-app), and styled with Tailwind CSS v3 (LTS Version compatible with Create React App Projects).
 - The backend is deployed as a Web Service written in Node.js, utilizing the Express framework to expose a REST API (POST) which the frontend interacts with to display dynamic content.
 
+## 💻 Tech Stack
+- Frontend: React.js (Create React App), Tailwind CSS v3
+- Backend: Node.js, Express, OpenRouter AI API, AJV (JSON Schema validation)
+- Other: Google reCAPTCHA v2
+- Web Hosting & Deployment: Render.com (static site + web service) + GitHub
+
 ## 💡 Project Design & Features
 
-1. **Main flow of execution:** When the user enters an app description and clicks build on the frontend site, the frontend JavaScript sends this description as a POST REST HTTP Request to the Backend Webservice endpoint. The backend Node.js app will then parse this description and wrap it in a template prompt instruction, sending the combined prompt as a request to an AI API facilitated by the "openrouter.ai" RESTful API. The backend will then receive a JSON-structured response from the AI API containing the extracted App Requirements in a hierarchical structure, and will parse and validate this JSON data using my pre-configured JSON Schema definition utilizing the "AJV" package. If the JSON data passes my schema validation, the backend will send this JSON object back to the frontend, and the frontend JavaScript will use this JSON object to dynamically generate the Mock App UI, and display the extracted requirements including (App Name, Entities, Roles, Features) both in a flat table display, as well as an optional modal that shows a prettified JSON display of these extracted requirements, revealing the hierarchical associations among "Roles", "Features", and "Entities".
-2. **Data validation:** implemented on both the front and backend, such that when a user enters only whitespaces on the frontend text box, they are prompted to enter a valid description and try again, and likewise on the backend, where the AI API is invoked only if the backend received a non-empty string for the app description. The backend also enforces a strict JSON Schema validation on any AI API generated response, before sending it back to the frontend.
-3. **Error-handling:** implemented on both the front and backend, such that when the backend fails to generate an AI response or the frontend fails to receive the backend response, or when any such operation times out, this error is handled gracefully and propagates from the backend to the frontend as a descriptive alert message that prompts the user to try again.
-4. **Automatic Retry Mechanism (Configurable with .env):** implemented on my backend to automatically retry any valid but failed AI API requests for a maximum count configurable by the environment variable.
-5. **Pooled AI Model Connections (Configurable with .env):** For the purpose of this project, my app is currently using a pool of rotating free AI models to bypass most rate-limiting or AI API timeout errors. The pool of AI models is extracted from a configurable environment variable which is a comma separated string of compatible AI models. The backend detects any rate-limited or errored out AI API requests, and automatically switches to a different AI Model that has the lowest consecutive failure count which it tracks. Any free AI models being added to the comma separated configuration string would need to be verified that they produce the same output payload structure and are compatible with my backend parsing logic. Also, it should be noted the free models have inherently slow and fluctuant response times, and I have confirmed that any significant delays witnessed in the AI responses on my app are a bottleneck of the free AI model, not a limitation of my prompt instruction which otherwise generates responses instantly on premium AI models with moderate token usage.
-6. **Custom Request Timeout (Configurable with .env):** implemented on both the front and backend via an environment variable, which sets a maximum duration each side waits for the AI's output. This wait time can be shortened to prevent the user from waiting too long on the frontend, and the backend from hanging indefinitely for the AI API's outputs.
-7. **Security remarks:** I deemed the current design of my web app not particularly vulnerable to any prompt-injection attacks, because my backend logic is making requests to a stateless AI API that has no access to any of my app's or its users' sensitive information, and is accepting the AI's response only if the returned JSON data strictly passes my JSON schema validation. Also, I'm simply transporting and surfacing this generated JSON content on my frontend UI without using any of its content for further page generation or data-access/manipulation logic, so even if a malicious user is able to inject and generate inappropriate JSON response, this content will not interact with or be reproducable by any other users of my web app.
-8. **Spam prevention:** The "Build" button is protected from ui-driven spamming with Google's reCAPTCHA Challenge v2. Also when a user hits "Build" on the frontend and the text box input passes minimal validation, the "Build" button becomes disabled from further clicking while the app is generating, and becomes reenabled only when the current app finishes generating or returns with a failure, in which case the error will be handled gracefully and a descriptive error message will prompt the user to try again.
-9. **Light/Dark Mode Support:** Dynamic light & dark theme switch respecting the current browser config, implemented using Tailwind's dark: class variants and React state management.
+1. **Main flow of execution**
+
+    When the user enters an app description and clicks build on the frontend site, the frontend JavaScript sends this description as a POST REST HTTP Request to the Backend Webservice endpoint. The backend Node.js app will then parse this description and wrap it in a template prompt instruction, sending the combined prompt as a request to an AI API facilitated by the "openrouter.ai" RESTful API. The backend will then receive a JSON-structured response from the AI API containing the extracted App Requirements in a hierarchical structure, and will parse and validate this JSON data using my pre-configured JSON Schema definition utilizing the "AJV" package. If the JSON data passes my schema validation, the backend will send this JSON object back to the frontend, and the frontend JavaScript will use this JSON object to dynamically generate the Mock App UI, and display the extracted requirements including (App Name, Entities, Roles, Features) both in a flat table display, as well as an optional modal that shows a prettified JSON display of these extracted requirements, revealing the hierarchical associations among "Roles", "Features", and "Entities".
+
+2. **Dynamic & Schema-driven UI rendering**
+
+    The AI is prompted to extract not just flat data, but also reasonable hierarchical associations between Roles, Features, Entities. Hence, the React frontend is able to generate a dynamic, schema-driven prototype UI with zero hard-coded content.
+
+3. **Data validation**
+
+    Implemented on both the front and backend, such that when a user enters only whitespaces on the frontend text box, they are prompted to enter a valid description and try again, and likewise on the backend, where the AI API is invoked only if the backend received a non-empty string for the app description. The backend also enforces a strict JSON Schema validation on any AI API generated response, before sending it back to the frontend.
+
+4. **Error-handling**
+
+    Implemented on both the front and backend, such that when the backend fails to generate an AI response or the frontend fails to receive the backend response, or when any such operation times out, this error is handled gracefully and propagates from the backend to the frontend as a descriptive alert message that prompts the user to try again.
+
+5. **Automatic Retry Mechanism (Configurable with .env)**
+
+    Implemented on my backend to automatically retry any valid but failed AI API requests for a maximum count configurable by the environment variable.
+
+6. **Pooled AI Model Connections (Configurable with .env)**
+
+    For the purpose of this project, my app is currently using a pool of rotating free AI models to bypass most rate-limiting or AI API timeout errors. The pool of AI models is extracted from a configurable environment variable which is a comma separated string of compatible AI models. The backend detects any rate-limited or errored out AI API requests, and automatically switches to a different AI Model that has the lowest consecutive failure count which it tracks. Any free AI models being added to the comma separated configuration string would need to be verified that they produce the same output payload structure and are compatible with my backend parsing logic. Also, it should be noted the free models have inherently slow and fluctuant response times, and I have confirmed that any significant delays witnessed in the AI responses on my app are a bottleneck of the free AI model, not a limitation of my prompt instruction which otherwise generates responses instantly on premium AI models with moderate token usage.
+
+7. **Custom Request Timeout (Configurable with .env)**
+
+    Implemented on both the front and backend via an environment variable, which sets a maximum duration each side waits for the AI's output. This wait time can be shortened to prevent the user from waiting too long on the frontend, and the backend from hanging indefinitely for the AI API's outputs.
+
+8. **Security remarks**
+
+    I deemed the current design of my web app not particularly vulnerable to any prompt-injection attacks, because my backend logic is making requests to a stateless AI API that has no access to any of my app's or its users' sensitive information, and is accepting the AI's response only if the returned JSON data strictly passes my JSON schema validation. Also, I'm simply transporting and surfacing this generated JSON content on my frontend UI without using any of its content for further page generation or data-access/manipulation logic, so even if a malicious user is able to inject and generate inappropriate JSON response, this content will not interact with or be reproducable by any other users of my web app.
+
+9. **Spam prevention**
+
+    The "Build" button is protected from ui-driven spamming with Google's reCAPTCHA Challenge v2. Also when a user hits "Build" on the frontend and the text box input passes minimal validation, the "Build" button becomes disabled from further clicking while the app is generating, and becomes re-enabled only when the current app finishes generating or returns with a failure, in which case the error will be handled gracefully and a descriptive error message will prompt the user to try again.
+
+10. **Light/Dark Mode Support**
+
+    Dynamic light & dark theme switch respecting the current browser config, implemented using Tailwind's dark: class variants and React state management.
+
+11. **Auto-Scroll & Back to Top Button**
+
+    Scrolls automatically to the generated Mock App UI section, and shows a "Back to Top" button if the user has scrolled past the input box for entering the app description, for easier navigation.
 
 ## 🌱 Future Improvement Backlogs
 
-1. **Authentication layer via Database providers such as MongoDB, Supabase, Firebase, etc.:** Because the current web app is accessible to the global public, anyone with the frontend site url can interact with the app and quickly exhaust the AI API's usage quota. So, a login mechanism can be implemented to allow only authenticated users that have enough credits or an active subscription status on their account to be able to access and use this App portal. The backend will also need to verify the requesting user's authority before invoking any AI APIs.
+1. **Authentication layer via Database providers such as MongoDB, Supabase, Firebase, etc.**
 
-2. **Save & Load previously created mock apps for each logged in user, stored in JSON format using NoSQL Database providers such as MongoDB, Firebase, etc.:** After implementing the Login mechanism and hooking up a NoSQL Database to the backend, I could create a new collection on the database where each document will represent a single pairing between a User and a Mock App they have created and saved in the past, with fields such as "userID", "generatedApp", etc. where the "generatedApp" field will store the JSON data of the created app. Here, the "userID" field could be indexed to allow for faster query performance. When a user logs into the App portal, the app could initiate a query against this database collection filtering by the indexed "userID" field, fetching all "generatedApp" JSON data belonging to this user, and display a selection panel on the frontend named like "My Saved Apps" where each button represents a historic app labelled with its "App Name" & "Creation Date". When a user clicks on a particular historic app, the chosen app's JSON data will be used to dynamically construct and display its Mock UI and extracted requirements on the page, replacing any previously generated App data.
+    Because the current web app is accessible to the global public, anyone with the frontend site url can interact with the app and quickly exhaust the AI API's usage quota. So, a login mechanism can be implemented to allow only authenticated users that have enough credits or an active subscription status on their account to be able to access and use this App portal. The backend will also need to verify the requesting user's authority before invoking any AI APIs.
 
-3. **Premium AI Model Subscription to bypass rate-limiting and/or enhance response quality:** Currently I'm using a pooled connection of free AI models which are inherently slow in response generation and occasionally misbehave. So, one way to improve this is to pay for a premium AI model subscription.
+2. **Save & Load previously created mock apps for each logged in user, stored in JSON format using NoSQL Database providers such as MongoDB, Firebase, etc.**
+
+    After implementing the Login mechanism and hooking up a NoSQL Database to the backend, I could create a new collection on the database where each document will represent a single pairing between a User and a Mock App they have created and saved in the past, with fields such as "userID", "generatedApp", etc. where the "generatedApp" field will store the JSON data of the created app. Here, the "userID" field could be indexed to allow for faster query performance. When a user logs into the App portal, the app could initiate a query against this database collection filtering by the indexed "userID" field, fetching all "generatedApp" JSON data belonging to this user, and display a selection panel on the frontend named like "My Saved Apps" where each button represents a historic app labelled with its "App Name" & "Creation Date". When a user clicks on a particular historic app, the chosen app's JSON data will be used to dynamically construct and display its Mock UI and extracted requirements on the page, replacing any previously generated App data.
+
+3. **Premium AI Model Subscription to bypass rate-limiting and/or enhance response quality & speed**
+
+    Currently I'm using a pooled connection of free AI models which are inherently slow in response generation and occasionally misbehave. So, one way to improve this is to pay for a premium AI model subscription.
 
 4. **Make the web app more pretty with CSS frameworks and libraries such as TailwindCSS, etc.**
+
+## 📜 License
+
+[**MIT License**](https://github.com/mkim87404/decoded-2025-intern-task-nodejs-backend/blob/main/LICENSE) – feel free to use in any personal or commercial project, fork, or open issues/PRs – contributions and feedback all welcome!
