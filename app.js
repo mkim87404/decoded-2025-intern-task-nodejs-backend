@@ -218,7 +218,8 @@ app.post('/extract', async (req, res, next) => {
         // Invoke the AI API
         response = await axios.post(OPENROUTER_API_URL, {
           model: aiModel.name, // process.env.AI_MODEL, // use this if need to fix the AI Model
-          messages: [{ role: 'user', content: prompt }]
+          messages: [{ role: 'user', content: prompt }],
+          response_format: { type: "json_object" },
         }, {
           headers: { Authorization: `Bearer ${OPENROUTER_API_KEY}`, 'Content-Type': 'application/json' },
           timeout: AXIOS_REQUEST_TIMEOUT
