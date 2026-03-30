@@ -229,10 +229,17 @@ app.post('/extract', async (req, res, next) => {
         break;
       } catch (err) {
         aiModel.failCount++;
+        if (!isProd) { throw err; }
       }
     }
 
     if (!response) throw new Error('Could not fetch any AI response within the set retry threshold');
+
+    // Check if the expected API response structure exists before parsing
+    if (!response.data?.choices?.[0]?.message?.content) {
+      if (!isProd) { console.error("Unexpected AI Response Structure:", response.data); }
+      throw new Error("AI API returned an empty or malformed response");
+    }
 
     // Extract only the AI's response
     // AI response JSON structure is the same for [OpenAI / Nvidia / DeepSeek / etc.] Chat Completions API responses
